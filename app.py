@@ -130,6 +130,51 @@ def interest(id):
         return make_response({"message": "Interest deleted successfully"}, 200)
     
 # Match route
+@app.route('/matches', methods=['GET', 'POST'])
+def matches():
+    if request.method == 'GET':
+        matches = Match.query.all()
+        response = [match.to_dict() for match in matches]
+        return make_response(jsonify(response), 200)
+
+    if request.method == 'POST':
+        data = request.get_json()
+        new_match = Match(sender_id=data['sender_id'], receiver_id=data['receiver_id'], 
+                          compatibility_score=data['compatibility_score'])
+        db.session.add(new_match)
+        db.session.commit()
+        return make_response({"message": "Match created successfully"}, 201)
+
+@app.route('/matches/<int:id>', methods=['GET', 'PATCH', 'DELETE'])
+def match(id):
+    match = Match.query.get(id)
+
+    if request.method == 'GET':
+        if not match:
+            return make_response({"error": "Match not found"}, 404)
+        return make_response(match.to_dict(), 200)
+
+    if request.method == 'PATCH':
+        if not match:
+            return make_response({"error": "Match not found"}, 404)
+        
+        data = request.get_json()
+        if 'status' in data:
+            match.status = data['status']
+        if 'compatibility_score' in data:
+            match.compatibility_score = data['compatibility_score']
+        
+        db.session.commit()
+        return make_response(match.to_dict(), 200)
+
+    if request.method == 'DELETE':
+        if not match:
+            return make_response({"error": "Match not found"}, 404)
+
+        db.session.delete(match)
+        db.session.commit()
+        return make_response({"message": "Match deleted successfully"}, 200)
+
 
 if __name__ == '__main__':
      app.run(port=8080, debug=True)
