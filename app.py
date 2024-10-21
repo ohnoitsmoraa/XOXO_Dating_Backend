@@ -2,7 +2,7 @@ from flask import Flask, make_response,request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, jwt_optional
 from models import *
 import os
 from dotenv import load_dotenv
@@ -30,6 +30,19 @@ db.init_app(app)
 
 # Initializing JWT
 jwt = JWTManager(app)
+
+# Error handlers for JWT
+@jwt.unauthorized_loader
+def unauthorized_response(error):
+    return make_response({"error": "Missing authorization header"}, 401)
+
+@jwt.invalid_token_loader
+def invalid_token_response(error):
+    return make_response({"error": "Invalid token"}, 401)
+
+@jwt.expired_token_loader
+def expired_token_response(expired_token):
+    return make_response({"error": "Token has expired"}, 401)
 
 # Home route
 @app.route ('/')
