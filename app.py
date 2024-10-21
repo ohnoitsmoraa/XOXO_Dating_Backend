@@ -51,6 +51,7 @@ def index():
 
 # User routes
 @app.route('/users', methods=['GET', 'POST'])
+@jwt_required(optional=True) # Allows access without a token for GET requests
 def users():
     if request.method == 'GET':
         users = User.query.all()
@@ -65,6 +66,7 @@ def users():
         return make_response({"message": "Success"}, 201) 
 
 @app.route('/users/<int:id>', methods=['GET', 'PATCH', 'DELETE']) 
+@jwt_required() # Requires valid JWT token
 def user(id):
     if request.method == 'GET':
         user = User.query.get(id)
@@ -107,6 +109,7 @@ def user(id):
 
 # Interest route
 @app.route('/users/<int:user_id>/interests', methods=['GET', 'POST'])
+@jwt_required()
 def user_interests(user_id):
     user = User.query.get(user_id)
 
@@ -127,6 +130,7 @@ def user_interests(user_id):
         return make_response({"message": "Interest added successfully"}, 201)
 
 @app.route('/interests/<int:id>', methods=['GET', 'PATCH', 'DELETE'])
+@jwt_required()
 def interest(id):
     interest = Interest.query.get(id)
 
@@ -156,6 +160,7 @@ def interest(id):
     
 # Match route
 @app.route('/matches', methods=['GET', 'POST'])
+@jwt_required()
 def matches():
     if request.method == 'GET':
         matches = Match.query.all()
@@ -171,6 +176,7 @@ def matches():
         return make_response({"message": "Match created successfully"}, 201)
 
 @app.route('/matches/<int:id>', methods=['GET', 'PATCH', 'DELETE'])
+@jwt_required()
 def match(id):
     match = Match.query.get(id)
 
