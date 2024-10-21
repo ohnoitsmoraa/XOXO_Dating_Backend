@@ -2,22 +2,34 @@ from flask import Flask, make_response,request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
+from flask_jwt_extended import JWTManager
 from models import *
+import os
+from dotenv import load_dotenv
+
+# Initialize dotenv
+load_dotenv()
 
 # Create Flask application object
 app = Flask(__name__)
 
 # Configure database connection to local file
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///dating_site.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
 
 # Disable modification tracking 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Configure JWT SECRET KEY  
+app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
 
 # Create a Migrate object to manage schema modifications
 migrate = Migrate(app, db)
 
 # Initialized the Flask app
 db.init_app(app)
+
+# Initializing JWT
+jwt = JWTManager(app)
 
 # Home route
 @app.route ('/')
@@ -175,6 +187,6 @@ def match(id):
         db.session.commit()
         return make_response({"message": "Match deleted successfully"}, 200)
 
-
+ 
 if __name__ == '__main__':
      app.run(port=5555, debug=True)
