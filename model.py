@@ -4,11 +4,10 @@ from sqlalchemy_serializer import SerializerMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timezone
 
-
 db = SQLAlchemy()
 
 class User(db.Model, SerializerMixin):
-    _tablename_ = 'users'
+    __tablename__ = 'users'  # Corrected here
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -38,17 +37,17 @@ class User(db.Model, SerializerMixin):
         return cls.query.filter_by(username=username).first()
 
 class Interest(db.Model, SerializerMixin):
-    _tablename_ = 'interests'
+    __tablename__ = 'interests'  # Corrected here
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    user = db.relationship('User', back_populates='interests')
+    user = db.relationship('User', back_populates='interests')  # Uncomment if you want to use this relationship
 
     serialize_rules = ('-user',)
 
 class Match(db.Model, SerializerMixin):
-    _tablename_ = 'matches'
+    __tablename__ = 'matches'  # Corrected here
 
     id = db.Column(db.Integer, primary_key=True)
     sender_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -76,5 +75,5 @@ class Match(db.Model, SerializerMixin):
     
 class Token(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    jti = db.Column (db.String(255), nullable=False, index=True)
-    created_at = db.Column (db.DateTime, default=datetime.now(timezone.utc))
+    jti = db.Column(db.String(255), nullable=False, index=True)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
