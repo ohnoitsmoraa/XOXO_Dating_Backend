@@ -2,8 +2,8 @@ from flask import Flask, make_response,request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, jwt_optional
-from models import *
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, jwt_optional, get_jwt
+from model import *
 import os
 from dotenv import load_dotenv
 
@@ -31,6 +31,8 @@ db.init_app(app)
 # Initializing JWT
 jwt = JWTManager(app)
 
+api = Api (app)
+
 # Error handlers for JWT
 @jwt.unauthorized_loader
 def unauthorized_response(error):
@@ -43,6 +45,14 @@ def invalid_token_response(error):
 @jwt.expired_token_loader
 def expired_token_response(expired_token):
     return make_response({"error": "Token has expired"}, 401)
+
+@jwt.token_in_blocklist_loader
+def token_in_blocklist(jwt_header, jwt_data):
+    jti = jwt_data['jti']
+
+    token = db.session.query(Token).filter(Token.jti == jti).scalar()
+
+    return token is not None
 
 # Home route
 @app.route ('/')
@@ -205,6 +215,143 @@ def match(id):
         db.session.delete(match)
         db.session.commit()
         return make_response({"message": "Match deleted successfully"}, 200)
+    
+# Restful API
+class RegisterUser(Resource):
+    def post(self):
+        data = request.get_json()
+        user = User.get_user_by_username(username=data.get('username'))
+
+        if user is not None:
+            return make_response({"error": "Username already exists"}, 400)
+        
+        new_user = User(username=data.get('username'), email=data.get('email'))
+        new_user.set_password(data.get('password'))
+        db.session.add(new_user)
+        db.session.commit()
+
+        return make_response({"message": "User created successfully"}, 201)
+
+api.add_resource(RegisterUser, '/register')
+
+class LoginUser(Resource):
+    def post(self):
+        data = request.get_json()
+        user = User.get_user_by_username(username=data.get('username'))
+
+        if user is None or not user.check_password(data.get('password')):
+            return make_response({"error": "Invalid username or password"}, 401)
+
+        access_token = create_access_token(identity=user.id)
+        return make_response({"access_token": access_token}, 200)
+    
+api.add_resource(LoginUser, '/login')
+
+
+class LogoutUser(Resource):
+    @jwt_required()   # With this you cannot log out without accessing / logging in
+    def get(self):
+        jwt = get_jwt()
+        jti = jwt['jti']
+
+        new_block_list = Token(jti=jti)
+        db.session.add(new_block_list)
+        db.session.commit()
+
+        return make_response ({"message" : "User logged out successfully"}, 201)
+
+
+api.add_resource(LogoutUser, '/logout')
+
+class UserResource(Resource):
+    # GET method to fetch one or all users
+    def get(self, id=None):
+        if id:
+            user = User.query.get(id)
+            if not user:
+                return make_response({"error": "User not found"}, 404)
+            return make_response(user.to_dict(), 200)
+        else:
+            users = User.query.all()
+            response = [user.to_dict() for user in users]
+            return make_response(jsonify(response), 200)
+    
+    # POST method to create a new user
+    def post(self):
+        data = request.get_json()
+        new_user = User(username=data['username'], email=data['email'])
+        db.session.add(new_user)
+        db.session.commit()
+        return make_response({"message": "User created successfully"}, 201)
+    
+    # PATCH method to update a user
+    def patch(self, id):
+        user = User.query.get(id)
+        if not user:
+            return make_response({"error": "User not found"}, 404)
+
+        data = request.get_json()
+
+        # Update only provided fields
+        for attr in data:
+            if hasattr(user, attr):
+                setattr(user, attr, data[attr])
+        
+        db.session.commit()
+        return make_response(user.to_dict(), 200)
+
+    # DELETE method to delete a user
+    def delete(self, id):
+        user = User.query.get(id)
+        if not user:
+            return make_response({"error": "User not found"}, 404)
+        
+        db.session.delete(user)
+        db.session.commit()
+        return make_response({"message": "User deleted successfully"}, 200)
+
+api.add_resource(UserResource, '/users', '/users/<int:id>')
+
+class InterestResource(Resource):
+    @jwt_required()
+    def get(self, user_id):
+        user = User.query.get(user_id)
+        if not user:
+            return make_response({"error": "User not found"}, 404)
+        interests = [interest.to_dict() for interest in user.interests]
+        return make_response(jsonify(interests), 200)
+
+    @jwt_required()
+    def post(self, user_id):
+        user = User.query.get(user_id)
+        if not user:
+            return make_response({"error": "User not found"}, 404)
+
+        data = request.get_json()
+        new_interest = Interest(name=data['name'], user_id=user_id)
+        db.session.add(new_interest)
+        db.session.commit()
+        return make_response({"message": "Interest added successfully"}, 201)
+
+api.add_resource(InterestResource, '/users/<int:user_id>/interests')
+
+class MatchResource(Resource):
+    @jwt_required()
+    def get(self):
+        matches = Match.query.all()
+        response = [match.to_dict() for match in matches]
+        return make_response(jsonify(response), 200)
+
+    @jwt_required()
+    def post(self):
+        data = request.get_json()
+        new_match = Match(sender_id=data['sender_id'], receiver_id=data['receiver_id'], 
+                          compatibility_score=data['compatibility_score'])
+        db.session.add(new_match)
+        db.session.commit()
+        return make_response({"message": "Match created successfully"}, 201)
+
+api.add_resource(MatchResource, '/matches')
 
  
 if __name__ == '__main__':
