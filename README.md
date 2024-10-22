@@ -9,7 +9,7 @@ XOXO Dating Backend is the server-side component of a modern dating application.
 - Matching algorithm
 - Real-time messaging
 - Geolocation-based user discovery
-- Privacy and security measures
+- Privacy and security measure
 
 ## Technologies Used
 - Node.js
@@ -19,9 +19,14 @@ XOXO Dating Backend is the server-side component of a modern dating application.
 - JSON Web Tokens (JWT) for authentication
 
 ## Prerequisites
-- Node.js (version X.X.X)
-- MongoDB (version X.X.X)
-- npm or yarn
+flask = "*"
+flask-sqlalchemy = "*"
+flask-migrate = "*"
+flask-restful = "*"
+sqlalchemy-serializer = "*"
+flask-jwt-extended = "*"
+python-dotenv = "*"
+python_version = "3.8.13"
 
 ## Installation
 1. Clone the repository:
@@ -30,32 +35,26 @@ XOXO Dating Backend is the server-side component of a modern dating application.
 cd XOXO_Dating_Backend
 
 3. Install dependencies:
-pipenv install then pipenv shell
+pipenv install 
 
 4. Set up environment variables:
-Create a `.env` file in the root directory and add the following:
-PORT=Your preferred port
-MONGODB_URI=Your MongoDB connection string
-JWT_SECRET=Your JWT secret key
+pipenv shell
 
 ## Running the Application
-[Add instructions on how to run your application]
-
-## API Documentation
-[Provide information about your API endpoints or link to your API documentation]
-
-## Testing
-[Include information about your testing setup and how to run tests]
+Run app.py to run the server.
+Run seed.py to run the database seeding script.
 
 ## Contributing
-
+Fork the repository and create a pull request.
+Follow the standard guidelines for commit messages and API documentation.
+Use the issue tracker for bug reports and feature requests.
 
 ## License
+XOXO Dating Site is licensed under the MIT License. See the LICENSE file for more details.
 
 
 ## Contact
-1. ohnoitsmoraa
-2. Markcryp
-3. TyreseMugo
-4. gafow
-
+1. Maureen
+2. Mark Njau
+3. Tyrese Mugo
+4. Yasir
