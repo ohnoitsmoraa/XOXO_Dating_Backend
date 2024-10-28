@@ -15,18 +15,28 @@ with app.app_context():
         db.session.commit()
 
         print("Creating users...")
-        # Creating users
+        # Creating users with profile pictures and hashed passwords
         users = [
-            User(username="JaneDoe", email="jane@example.com", bio="Love to travel, cook, and meet new people. Always up for an adventure!"),
-            User(username="JohnSmith", email="john@example.com", bio="Avid reader, tech enthusiast, and runner. Always chasing the next big idea."),
-            User(username="EmilyJohnson", email="emily@example.com", bio="Fashion designer who loves painting and outdoor activities. Always exploring creativity!"),
-            User(username="MichaelBrown", email="michael@example.com", bio="Entrepreneur and foodie. Can’t say no to a good book or a culinary adventure!"),
-            User(username="SophiaWilliams", email="sophia@example.com", bio="Yoga instructor with a passion for wellness and meditation. Loves to be outdoors."),
-            User(username="JamesMiller", email="james@example.com", bio="Software engineer with a love for gaming and sci-fi. Always coding something cool!"),
-            User(username="OliviaDavis", email="olivia@example.com", bio="Photographer capturing moments of life. Love hiking and exploring new landscapes."),
-            User(username="DavidWilson", email="david@example.com", bio="Guitarist in a band and music lover. Can’t live without tunes and adventures!"),
-            User(username="EmmaClark", email="emma@example.com", bio="Digital marketer with a love for travel and food. Enjoys good company and good vibes."),
-            User(username="ChrisEvans", email="chris@example.com", bio="Fitness coach and mountain climber. Always chasing new challenges."),
+            User(username="JaneDoe", email="jane@example.com", password=generate_password_hash("password123"), bio="Love to travel, cook, and meet new people.",
+                 profile_picture="https://randomuser.me/api/portraits/women/44.jpg"),
+            User(username="JohnSmith", email="john@example.com", password=generate_password_hash("password123"), bio="Avid reader, tech enthusiast, and runner.",
+                 profile_picture="https://randomuser.me/api/portraits/men/45.jpg"),
+            User(username="EmilyJohnson", email="emily@example.com", password=generate_password_hash("password123"), bio="Fashion designer who loves painting.",
+                 profile_picture="https://randomuser.me/api/portraits/women/46.jpg"),
+            User(username="MichaelBrown", email="michael@example.com", password=generate_password_hash("password123"), bio="Entrepreneur and foodie.",
+                 profile_picture="https://randomuser.me/api/portraits/men/46.jpg"),
+            User(username="SophiaWilliams", email="sophia@example.com", password=generate_password_hash("password123"), bio="Yoga instructor with a passion for wellness.",
+                 profile_picture="https://randomuser.me/api/portraits/women/47.jpg"),
+            User(username="JamesMiller", email="james@example.com", password=generate_password_hash("password123"), bio="Software engineer with a love for gaming.",
+                 profile_picture="https://randomuser.me/api/portraits/men/47.jpg"),
+            User(username="OliviaDavis", email="olivia@example.com", password=generate_password_hash("password123"), bio="Photographer capturing moments of life.",
+                 profile_picture="https://randomuser.me/api/portraits/women/48.jpg"),
+            User(username="DavidWilson", email="david@example.com", password=generate_password_hash("password123"), bio="Guitarist in a band and music lover.",
+                 profile_picture="https://randomuser.me/api/portraits/men/48.jpg"),
+            User(username="EmmaClark", email="emma@example.com", password=generate_password_hash("password123"), bio="Digital marketer with a love for travel.",
+                 profile_picture="https://randomuser.me/api/portraits/women/49.jpg"),
+            User(username="ChrisEvans", email="chris@example.com", password=generate_password_hash("password123"), bio="Fitness coach and mountain climber.",
+                 profile_picture="https://randomuser.me/api/portraits/men/49.jpg"),
         ]
 
         db.session.add_all(users)
@@ -67,16 +77,16 @@ with app.app_context():
         print("Creating tokens...")
         # Creating tokens
         tokens = [
-            Token(jti="token_for_jane_doe"),
-            Token(jti="token_for_sophia_williams"),
-            Token(jti="token_for_david_wilson")
+            Token(jti="token_for_jane_doe", user_id=user_dict["JaneDoe"]),
+            Token(jti="token_for_sophia_williams", user_id=user_dict["SophiaWilliams"]),
+            Token(jti="token_for_david_wilson", user_id=user_dict["DavidWilson"]),
         ]
 
         db.session.add_all(tokens)
         db.session.commit()
 
         print("Seeding done!")
-    
+
     except Exception as e:
         print(f"An error occurred during seeding: {e}")
         db.session.rollback()

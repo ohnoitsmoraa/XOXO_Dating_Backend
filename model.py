@@ -7,13 +7,14 @@ from datetime import datetime, timezone
 db = SQLAlchemy()
 
 class User(db.Model, SerializerMixin):
-    __tablename__ = 'users'  # Corrected here
+    __tablename__ = 'users'  
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     bio = db.Column(db.Text)
     password = db.Column(db.String(50))
+    profile_picture = db.Column(db.String(500)) 
     interests = db.relationship('Interest', back_populates='user', cascade='all, delete-orphan')
     sent_matches = db.relationship('Match', foreign_keys='Match.sender_id', back_populates='sender')
     received_matches = db.relationship('Match', foreign_keys='Match.receiver_id', back_populates='receiver')
@@ -77,3 +78,6 @@ class Token(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     jti = db.Column(db.String(255), nullable=False, index=True)
     created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # Use 'users.id'
+    user = db.relationship('User', backref=db.backref('tokens', lazy=True))
+
