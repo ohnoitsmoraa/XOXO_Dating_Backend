@@ -120,7 +120,7 @@ def user(id):
 
 # Interest route
 @app.route('/users/<int:user_id>/interests', methods=['GET', 'POST'])
-@jwt_required()
+# @jwt_required()
 def user_interests(user_id):
     user = User.query.get(user_id)
 
@@ -141,7 +141,7 @@ def user_interests(user_id):
         return make_response({"message": "Interest added successfully"}, 201)
 
 @app.route('/interests/<int:id>', methods=['GET', 'PATCH', 'DELETE'])
-@jwt_required()
+# @jwt_required()
 def interest(id):
     interest = Interest.query.get(id)
 
@@ -171,7 +171,7 @@ def interest(id):
     
 # Match route
 @app.route('/matches', methods=['GET', 'POST'])
-@jwt_required()
+# @jwt_required()
 def matches():
     if request.method == 'GET':
         matches = Match.query.all()
