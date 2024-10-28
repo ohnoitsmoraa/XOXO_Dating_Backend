@@ -14,7 +14,8 @@ load_dotenv()
 app = Flask(__name__)
 
 # Configure database connection to local file
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
+# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI', 'sqlite:///dating_site.db')
 
 # Disable modification tracking 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
